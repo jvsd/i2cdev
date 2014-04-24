@@ -1,0 +1,2 @@
+/usr/bin/ar cr libI2Cdev.a  CMakeFiles/I2Cdev.dir/I2Cdev.cpp.o
+/usr/bin/ranlib libI2Cdev.a
