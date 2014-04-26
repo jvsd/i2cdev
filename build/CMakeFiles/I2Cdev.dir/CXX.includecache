@@ -6,3 +6,31 @@
 
 #IncludeRegexTransform: 
 
+/home/jamesd/Developer/I2Cdev/I2Cdev.cpp
+I2Cdev.h
+/home/jamesd/Developer/I2Cdev/I2Cdev.h
+
+/home/jamesd/Developer/I2Cdev/I2Cdev.h
+linux/i2c-dev.h
+-
+errno.h
+-
+string.h
+-
+stdio.h
+-
+stdlib.h
+-
+unistd.h
+-
+sys/ioctl.h
+-
+sys/types.h
+-
+sys/stat.h
+-
+stdint.h
+-
+fcntl.h
+-
+

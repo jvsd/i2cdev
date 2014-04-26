@@ -3,18 +3,6 @@
 /** Default constructor.
  */
 I2Cdev::I2Cdev() {
-sprintf(filename,"/dev/i2c-2");
-if ((file = open(filename,O_RDWR)) < 0) {
-    printf("Failed to open the bus.");
-    exit(1);
-}
-int addr = 0x68;
-if(ioctl(file,I2C_SLAVE,addr) < 0) {
-        printf("Failed to talk to slave.\n");
-        exit(1);
-        }
-      memset(rxBuffer, 0, sizeof(rxBuffer));
-        memset(txBuffer, 0, sizeof(txBuffer));
 }
 
 
@@ -135,9 +123,10 @@ int8_t I2Cdev::readBytes(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint8
     //uint32_t t1 = millis();
 
 
+    uint8_t txBuffer[1];
     txBuffer[0] = regAddr;
-    write(file,txBuffer,1);
-    if (read(file,data,length) != length)
+    write(devAddr,txBuffer,1);
+    if (read(devAddr,data,length) != length)
     {printf("failed to read from i2c bux .\n");}
 
 
@@ -158,11 +147,13 @@ int8_t I2Cdev::readWords(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint1
     int8_t count = 0;
     int i = 0;
     //uint32_t t1 = millis();
-
+    uint8_t txBuffer[1];
+    uint8_t rxBuffer[length*2];
+    
     txBuffer[0] = regAddr;
-    write(file,txBuffer,1);
+    write(devAddr,txBuffer,1);
     bool msb = true;
-    if(read(file,rxBuffer,length*2) != length*2)
+    if(read(devAddr,rxBuffer,length*2) != length*2)
     {printf("failed to read from i2c bus. \n");}
     for(; count < length;)
     {
@@ -297,9 +288,18 @@ bool I2Cdev::writeWord(uint8_t devAddr, uint8_t regAddr, uint16_t data) {
 bool I2Cdev::writeBytes(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint8_t* data) {
     uint8_t status = 0;
 
+    uint8_t txBuffer[1];
     txBuffer[0] = regAddr;
-    write(file,txBuffer,1);
-    write(file,data,length);
+    if(write(devAddr,txBuffer,1) != 1)
+    {
+        printf("Failed to write in writeBytes 1. \n");
+        status = 1;
+    }
+    if(write(devAddr,data,length) != length)
+    {
+        printf("Failed to write in writeBytes 2. \n");
+        status = 1;
+    }
 
     return status == 0;
 }
@@ -314,15 +314,16 @@ bool I2Cdev::writeBytes(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint8_
 bool I2Cdev::writeWords(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint16_t* data) {
     uint8_t status = 0;
     int k = 0;
+    uint8_t txBuffer[length*2];
     txBuffer[0] = regAddr;
-    write(file,txBuffer,1);
+    write(devAddr,txBuffer,1);
     for (int i = 0; i < length * 2; i++)
     {
         txBuffer[k] = (uint8_t)data[i++] >> 8;
         txBuffer[k++] = (uint8_t)data[i];
         k = k+2;
     }
-    write(file,txBuffer,length*2);
+    write(devAddr,txBuffer,length*2);
     
     return status == 0;
 }
