@@ -288,16 +288,16 @@ bool I2Cdev::writeWord(uint8_t devAddr, uint8_t regAddr, uint16_t data) {
 bool I2Cdev::writeBytes(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint8_t* data) {
     uint8_t status = 0;
 
-    uint8_t txBuffer[1];
+    uint8_t txBuffer[length+1];
     txBuffer[0] = regAddr;
-    if(write(devAddr,txBuffer,1) != 1)
+    for (int i=0; i<length;i++)
+    {
+        txBuffer[i+1] = data[i];
+    }
+    
+    if(write(devAddr,txBuffer,length+1) != 1)
     {
         printf("Failed to write in writeBytes 1. \n");
-        status = 1;
-    }
-    if(write(devAddr,data,length) != length)
-    {
-        printf("Failed to write in writeBytes 2. \n");
         status = 1;
     }
 
@@ -313,17 +313,16 @@ bool I2Cdev::writeBytes(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint8_
  */
 bool I2Cdev::writeWords(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint16_t* data) {
     uint8_t status = 0;
-    int k = 0;
+    int k = 1;
     uint8_t txBuffer[length*2];
     txBuffer[0] = regAddr;
-    write(devAddr,txBuffer,1);
     for (int i = 0; i < length * 2; i++)
     {
         txBuffer[k] = (uint8_t)data[i++] >> 8;
         txBuffer[k++] = (uint8_t)data[i];
         k = k+2;
     }
-    write(devAddr,txBuffer,length*2);
+    write(devAddr,txBuffer,(length*2)+1);
     
     return status == 0;
 }
